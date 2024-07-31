@@ -221,7 +221,8 @@ class TweetCommentReplyCreateView(viewsets.ModelViewSet):
                     )
                 else:
                     try:
-                        super().create(request, *args, **kwargs)
+                        # super().create(request, *args, **kwargs)
+                        res = super().create(request, *args, **kwargs)
                     except Exception as e:
                         return Response(
                             {
@@ -237,6 +238,7 @@ class TweetCommentReplyCreateView(viewsets.ModelViewSet):
                                 "status": True,
                                 "message": "Reply SuccessFully on Added",
                                 "status_code": status.HTTP_200_OK,
+                                "data": res.data
                             },
                             status=status.HTTP_200_OK,
                         )
@@ -291,10 +293,11 @@ class TweetCommentReplyDisplayView(viewsets.ModelViewSet):
     http_method_names = ['get']
 
     def get_queryset(self):
-        if self.request.data.get("comment"):
+        if self.request.query_params.get("comment"):
             queryset = TweetCommentReplies.objects.filter(
-                tweetcomment_id=self.request.data.get("comment"),deleted=False
-            )
+                tweetcomment_id=self.request.query_params.get("comment"), deleted=False
+            ).order_by("-id")
             return queryset
         else:
             return []
+

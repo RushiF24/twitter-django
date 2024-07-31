@@ -34,9 +34,10 @@ class TweetCommentDisplaySerializer(DynamicSerializer):
         fields = "__all__"
 
 class TweetReplySerializer(DynamicSerializer):
+    user = UserSerializer(read_only=True)
     class Meta:
         model = TweetCommentReplies
-        fields = ['tweetcomment','reply_message']
+        fields = "__all__"
 
     def create(self, validated_data):
         user = self.context.get("request").user
@@ -44,6 +45,7 @@ class TweetReplySerializer(DynamicSerializer):
         return tweet_comment
 
 class TweetReplyDisplaySerializer(DynamicSerializer):
+    user = UserSerializer()
     class Meta:
         model = TweetCommentReplies
         fields = "__all__"

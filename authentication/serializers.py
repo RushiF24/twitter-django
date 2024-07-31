@@ -43,13 +43,17 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
 
         refresh = self.get_token(self.user)
-        # print("this is data", data, self.user)
+        print("this is data", data)
 
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
 
-        data["user"] = {'email': self.user.email, 'id': self.user.id, 'image': str(self.user.profile.image) or None}
-
+        if hasattr(self.user, 'profile'):
+            image = str(self.user.profile.image)
+        else:
+            image = None
+            
+        data["user"] = {'email': self.user.email, 'id': self.user.id, 'image':image}
         if api_settings.UPDATE_LAST_LOGIN:
             update_last_login(None, self.user)
 
