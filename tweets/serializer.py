@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Tweets, TweetUploads
+from .models import Tweets, TweetUploads, ReTweet
 from django.core.validators import FileExtensionValidator
 from authentication.serializers import UserSerializer
 from liketweet.serializer import TweetLikeGetSerializer
@@ -80,3 +80,12 @@ class TweetSerializer(serializers.ModelSerializer):
                 )
 
         return product
+
+class ReTweetSerializer(serializers.ModelSerializer):
+
+    # tweet = TweetDisplaySerializer(read_only=True)
+    # user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = ReTweet
+        fields = ['tweet', 'user']

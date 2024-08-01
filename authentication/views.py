@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.filters import SearchFilter
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -36,6 +37,8 @@ class UserViewset(ModelViewSet):
     serializer_class = UserSerializer
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated, )
+    filter_backends = [SearchFilter]
+    search_fields = ['username', 'first_name', 'last_name']
 
     def get_queryset(self):
         user = self.request.user

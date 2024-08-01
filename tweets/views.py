@@ -3,10 +3,10 @@ from rest_framework import viewsets
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 from datetime import datetime
 from rest_framework.permissions import IsAuthenticated
-from .serializer import TweetSerializer, TweetDisplaySerializer
+from .serializer import TweetSerializer, TweetDisplaySerializer, ReTweetSerializer
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Tweets
+from .models import Tweets, ReTweet
 from .permissions import IsOwnerOrReadOnly
 from django.db.models import Count
 from rest_framework.views import APIView
@@ -156,3 +156,7 @@ class TopTweetDisplayView(viewsets.ModelViewSet):
             },
             status=status.HTTP_200_OK,
         )
+
+class ReTweetView(viewsets.ModelViewSet):
+    queryset = ReTweet.objects.all()
+    serializer_class = ReTweetSerializer

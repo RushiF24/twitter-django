@@ -17,9 +17,11 @@ class DynamicSerializer(serializers.ModelSerializer):
                 self.fields.pop(field_name)
 
 class TweetCommentSerializer(DynamicSerializer):
+
+    user = UserSerializer(read_only=True)
     class Meta:
         model = TweetComments
-        fields = ['tweet','comment_message']
+        fields = "__all__"
 
     def create(self, validated_data):
         user = self.context.get("request").user

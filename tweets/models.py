@@ -25,3 +25,8 @@ class TweetUploads(models.Model):
 
     def __str__(self):
         return "%s" % (self.tweet.content)
+
+class ReTweet(models.Model):
+    tweet = models.ForeignKey(Tweets, on_delete=models.CASCADE, related_name="retweets")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)

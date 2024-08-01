@@ -83,8 +83,11 @@ class TweetCommentCreateView(viewsets.ModelViewSet):
                     )
                 else:
                     try:
-                        data = super().create(request, *args, **kwargs)
-                        print(data)
+                        res = super().create(request, *args, **kwargs)
+                        # serializer = TweetSerializer(data=res.data)
+                        print(res.data)
+                        # if serializer.is_valid():
+                        #     pass
                     except Exception as e:
                         return Response(
                             {
@@ -100,7 +103,7 @@ class TweetCommentCreateView(viewsets.ModelViewSet):
                                 "status": True,
                                 "message": "Commented SuccessFully on Tweet",
                                 "status_code": status.HTTP_200_OK,
-                                # "data":data
+                                "data":res.data
                             },
                             status=status.HTTP_200_OK,
                         )
@@ -275,16 +278,17 @@ class TweetCommentReplyCreateView(viewsets.ModelViewSet):
 class TweetCommentDisplayView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = TweetCommentDisplaySerializer
-    http_method_names = ['get']
+    http_method_names = ["get"]
 
     def get_queryset(self):
-        if self.request.data.get("tweet"):
+        if self.request.query_params.get("tweet"):
             queryset = TweetComments.objects.filter(
-                tweet_id=self.request.data.get("tweet"),deleted=False
-            )
+                tweet_id=self.request.query_params.get("tweet"), deleted=False
+            ).order_by("-id")
             return queryset
         else:
             return []
+
 
 
 class TweetCommentReplyDisplayView(viewsets.ModelViewSet):
