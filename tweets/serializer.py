@@ -83,9 +83,15 @@ class TweetSerializer(serializers.ModelSerializer):
 
 class ReTweetSerializer(serializers.ModelSerializer):
 
-    # tweet = TweetDisplaySerializer(read_only=True)
-    # user = UserSerializer(read_only=True)
-
     class Meta:
         model = ReTweet
         fields = ['tweet', 'user']
+    
+class ReTweetDisplaySerializer(serializers.ModelSerializer):
+
+    retweeted_tweet = TweetDisplaySerializer(read_only=True, source="tweet")
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = ReTweet
+        fields = ['id', 'retweeted_tweet', 'user', 'created_at']

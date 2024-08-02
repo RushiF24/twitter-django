@@ -14,8 +14,8 @@ class Tweets(models.Model):
     deleted_at = models.DateTimeField(null=True)    
     deleted = models.BooleanField(default=False)
 
-    def __str__(self):
-        return self.content
+    # def __str__(self):
+    #     return self.content
 
 
 class TweetUploads(models.Model):
@@ -30,3 +30,8 @@ class ReTweet(models.Model):
     tweet = models.ForeignKey(Tweets, on_delete=models.CASCADE, related_name="retweets")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # def __str__(self):
+    #     return 'self.tweet'
+    class Meta:
+        unique_together = ('tweet', 'user')

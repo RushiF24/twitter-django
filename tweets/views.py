@@ -1,9 +1,9 @@
-from django.shortcuts import render
-from rest_framework import viewsets
+from django.shortcuts import render, get_object_or_404
+from rest_framework import viewsets, generics
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 from datetime import datetime
 from rest_framework.permissions import IsAuthenticated
-from .serializer import TweetSerializer, TweetDisplaySerializer, ReTweetSerializer
+from .serializer import TweetSerializer, TweetDisplaySerializer, ReTweetSerializer, ReTweetDisplaySerializer
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Tweets, ReTweet
@@ -115,14 +115,27 @@ class TweetDisplayView(viewsets.ModelViewSet):
     queryset = Tweets.objects.filter(deleted=False).order_by("-id")
 
     def list(self, request):
-        queryset = self.queryset.filter(user=request.user)
-        serializer = self.get_serializer(queryset, many=True)
+
+        def myFunc(e):
+            return e['created_at']
+
+        # queryset = self.queryset.filter(user=request.user)
+        tweets = Tweets.objects.filter(user=request.user)
+        retweets = ReTweet.objects.filter(user=request.user)
+
+        tweets_data = TweetDisplaySerializer(tweets, many=True).data    
+        retweets_data = ReTweetDisplaySerializer(retweets, many=True).data
+
+        feed = tweets_data + retweets_data
+        feed.sort(reverse=True, key=myFunc)
+        # print(feed)
+        # serializer = self.get_serializer(queryset, many=True)
         return Response(
             {
                 "status": True,
                 "message": "All Tweets SuccessFully Retreived",
                 "status_code": status.HTTP_200_OK,
-                "data": serializer.data,
+                "data":feed
             },
             status=status.HTTP_200_OK,
         )
@@ -142,7 +155,7 @@ class TopTweetDisplayView(viewsets.ModelViewSet):
             total=Count("tweet_like", distinct=True)
             + Count("tweet_comment", distinct=True)
         )
-    ).order_by("-total")[:5]
+    ).order_by("-total")[:20]
 
     def list(self, request):
         queryset = self.get_queryset()
@@ -157,6 +170,76 @@ class TopTweetDisplayView(viewsets.ModelViewSet):
             status=status.HTTP_200_OK,
         )
 
-class ReTweetView(viewsets.ModelViewSet):
+class ReTweetView(generics.ListCreateAPIView):
     queryset = ReTweet.objects.all()
-    serializer_class = ReTweetSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ReTweetSerializer
+        return ReTweetDisplaySerializer
+
+
+    def create(self, request, *args, **kwargs):
+        try:
+            super().create(request, *args, **kwargs)
+        except Exception as e:
+            print(e)
+            return Response(
+                {
+                    "status": False,
+                    "message": "You ReTweeted Already",
+                    "status_code": status.HTTP_409_CONFLICT,
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        else:
+            return Response(
+                {
+                    "status": True,
+                    "message": "Retweeted SuccessFully",
+                    "status_code": status.HTTP_200_OK,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+class ReTweetDestroyView(generics.DestroyAPIView):
+    queryset = ReTweet.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        retweet = self.get_object()
+        tweet = get_object_or_404(Tweets, id=retweet.id)
+        if tweet.deleted == False:
+            try:
+                retweet.delete()
+            except:
+                return Response(
+                    {
+                        "status": False,
+                        "message": "Opps Some Error Occured Try Again!",
+                        "status_code": status.HTTP_400_BAD_REQUEST,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            else:
+                return Response(
+                    {
+                        "status": True,
+                        "message": "Retweet SuccessFully Deleted",
+                        "status_code": status.HTTP_204_NO_CONTENT,
+                    },
+                    status=status.HTTP_204_NO_CONTENT,
+                )
+        else:
+            return Response(
+                {
+                    "status": False,
+                    "message": "Tweet Not Available",
+                    "status_code": status.HTTP_404_NOT_FOUND,
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+    # def destroy(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     self.perform_destroy(instance)
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+ 
