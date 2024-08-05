@@ -43,9 +43,7 @@ class FollowUserView(generics.CreateAPIView):
         serializer.save(following=following, follower=self.request.user) 
         headers = self.get_success_headers(serializer.data)
 
-        Notification.objects.create(message=f"{self.request.user} followed you", user=following)
-        # notification = Notification.objects.create(message=f"{self.request.user} followed you", user=following)
-        # notification.save()
+        Notification.objects.create(message=f"{self.request.user} followed you", user=following, source_user=self.request.user)
         
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 

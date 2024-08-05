@@ -11,7 +11,8 @@ class NotificationCreateSerializer(serializers.ModelSerializer):
 
 class NotificationListSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    source_user = UserSerializer(read_only=True)
 
     class Meta:
         model = Notification
-        fields = ('message', 'user', 'is_read')
+        fields = ('message', 'user', 'source_user','is_read')
