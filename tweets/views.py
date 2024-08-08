@@ -120,8 +120,11 @@ class TweetDisplayView(viewsets.ModelViewSet):
             return e['created_at']
 
         # queryset = self.queryset.filter(user=request.user)
-        tweets = Tweets.objects.filter(user=request.user)
-        retweets = ReTweet.objects.filter(user=request.user)
+        # tweets = Tweets.objects.filter(user=request.user)
+        # retweets = ReTweet.objects.filter(user=request.user)
+
+        tweets = Tweets.objects.all()
+        retweets = ReTweet.objects.all()
 
         tweets_data = TweetDisplaySerializer(tweets, many=True).data    
         retweets_data = ReTweetDisplaySerializer(retweets, many=True).data
